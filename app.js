@@ -3,162 +3,103 @@ const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const exphbs = require("express-handlebars");
 const path = require("path");
-const { allowedNodeEnvironmentFlags } = require("process");
 
 const app = express();
 const PORT = 3000;
 
-//Set Handlebars as our templating engine
+// Set Handlebars as our templating engine
 app.engine("handlebars", exphbs.engine());
 app.set("view engine", "handlebars");
 app.set("views", "./views");
 
-//Sets our static resources folder
-app.use(express.static(path.join(__dirname,"public")));
+// Static folder for public files
+app.use(express.static(path.join(__dirname, "public")));
 
-//Middleware body-parser parses jsons requests
+// Middleware for parsing requests
 app.use(bodyParser.json());
+app.use(express.urlencoded({ extended: true }));
 
-//MongoDB Database connection
-const mongoURI = "mongodb://localhost:27017/gamelibrary"
-mongoose.connect(mongoURI);
+// MongoDB connection
+const mongoURI = "mongodb://localhost:27017/EmployeeApp"
+mongoose.connect(mongoURI)
 const db = mongoose.connection;
-//check for connection
-db.on("error", console.error.bind(console, "MonoDB Connection error"));
-db.once("open", ()=>{
-    console.log("Connected to MongoDB Database");
+db.on("error", console.error.bind(console, "MongoDB connection error:"));
+db.once("open", () => {
+  console.log("Connected to MongoDB");
 });
 
-//Mongoose Schema and Model
-const gameSchema = new mongoose.Schema({
-    gamename:String,
-    developer:String
+// Mongoose Schema and Model
+const employeeSchema = new mongoose.Schema({
+  firstName: String,
+  lastName: String,
+  department: String,
+  startDate: Date,
+  jobTitle: String,
+  salary: Number,
 });
 
-const Game = mongoose.model("Game", gameSchema,"favoritegames"); 
+const Employee = mongoose.model("Employee", employeeSchema);
 
-//CRUD app examples Connection to databas route examples below
+// Routes
 
-//get route to get data from database
-app.get("/games", async (req,res)=>{
-    try{
-        const games = await Game.find();
-        res.json(games);
-    }catch(err){
-        res.status(500).json({error:"Failed to fetch game data"});
-    }
+// Home route (view all employees)
+app.get("/", async (req, res) => {
+  try {
+    const employees = await Employee.find();
+    res.render("home", { employees });
+  } catch (err) {
+    res.status(500).send("Error fetching employees");
+  }
 });
 
-//get route for a single user
-app.get("/games/:id", async (req,res)=>{
-    try{
-        const game = await Game.findById(req.params.id);
-        if(!game){
-            return res.status(404).json({error:"Game not found"});
-        }
-        res.json(game);
-
-    }catch(err){
-        res.status(500).json({error:"Failed to fetch game"});
-    }
+// Add employee form
+app.get("/add", (req, res) => {
+  res.render("addEmployee");
 });
 
-//post route to add data
-app.post("/addgame", async (req,res)=>{
-    console.log(req.body);
-    try{
-        const newGame = new Game(req.body);
-        const savedGame = await newGame.save();
-        res.status(201).json(savedGame);
-        console.log(savedGame);
-    }catch(err){
-        app.put("/users/:id", async (req, res) => {
-            try {
-                const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, {
-                    new: true,
-                    runValidators: true,
-                });
-                if (!updatedUser) {
-                    return res.status(404).json({ error: "User not found" });
-                }
-                res.json(updatedUser);
-            } catch (err) {
-                res.status(400).json({ error: "Failed to update user" });
-            }
-        });
-    }
+// Add employee to DB
+app.post("/add", async (req, res) => {
+  try {
+    const newEmployee = new Employee(req.body);
+    await newEmployee.save();
+    res.redirect("/");
+  } catch (err) {
+    res.status(400).send("Error adding employee");
+  }
 });
 
-//put route to update data
-app.put("/updategame/:id", (req,res)=>{
-    //example using a promise statement
-    Game.findByIdAndUpdate(req.params.id, req.body, {
-        new:true,
-        runValidators:true
-    }).then((updatedgame)=>{
-        if(!updatedgame){
-            return res.status(404).json({ error: "game not found" });    
-        }
-        res.json(updatedgame);
-    }).catch((err)=>{
-        res.status(400).json({ error: "Failed to update the game" });
-    });
+// Update employee form
+app.get("/update/:id", async (req, res) => {
+  try {
+    const employee = await Employee.findById(req.params.id);
+    if (!employee) return res.status(404).send("Employee not found");
+    res.render("updateEmployee", { employee });
+  } catch (err) {
+    res.status(500).send("Error fetching employee");
+  }
 });
 
-//Example of delete route
-app.delete("/deletegame/gamename/", async (req,res)=>{
-    try{
-        const gamename = req.query;
-        const game = await Game.find(gamename);
-
-        if(game.length === 0){
-            return res.status(404).json({ error: "Failed to find the game" });
-        }
-        const deletedGamme = await Game.findOneAndDelete(gamename);
-        res.json({message:"Game deleted successfully"})
-    }catch(err){
-        console.error(err);
-        res.status(404).json({ error: "Game not found"});
-    }
-})
-
-let message = "Wouldn't you like to be a pepper too??";
-
-function tellTheMessage(){
-    console.log(message);
-}
-
-//tellTheMessage();
-
-//Handlebars examples
-app.get("/hbsindex", (req,res)=>{
-    res.render("home", {
-        title:"Welcome to the Handlbars Site",
-        message:"This is our page using the template engine"
-    })
+// Update employee in DB
+app.post("/update/:id", async (req, res) => {
+  try {
+    await Employee.findByIdAndUpdate(req.params.id, req.body);
+    res.redirect("/");
+  } catch (err) {
+    res.status(400).send("Error updating employee");
+  }
 });
 
-app.get("/addgame", (req,res)=>{
-    res.render("addgame", {
-        title:"Welcome to the Handlbars Site",
-        message:"This is our page using the template engine"
-    })
+// Delete employee
+app.post("/delete/:id", async (req, res) => {
+  try {
+    await Employee.findByIdAndDelete(req.params.id);
+    res.redirect("/");
+  } catch (err) {
+    res.status(500).send("Error deleting employee");
+  }
 });
 
-//This is an example of a route
-app.get("/",(req, res)=>{
-    res.sendFile(path.join(__dirname, "public", "index.html"));
+// Start server
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
 });
-
-app.get("/json",(req, res)=>{
-    res.sendFile(path.join(__dirname, "public", "players.json"));
-});
-
-app.get("/nodemon",(req,res)=>{
-    res.sendStatus(500);
-})
-
-//Creates Listener on port 3000
-app.listen(PORT, ()=>{
-    console.log("Server running on port 3000.");
-})
