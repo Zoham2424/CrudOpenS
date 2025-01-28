@@ -5,10 +5,13 @@ ody {
   
   header {
     margin-bottom: 20px;
+    border-bottom: 2px solid #ccc;
+    padding-bottom: 10px;
   }
-  
   nav {
-    margin-top: 10px;
+    background-color: #f4f4f4;
+    padding: 10px;
+    border-radius: 5px;
   }
 
   form {
