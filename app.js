@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const exphbs = require("express-handlebars");
 const path = require("path");
+const methodOverride = require('method-override');
 
 const app = express();
 const PORT = 3000;
@@ -12,20 +13,22 @@ app.engine("handlebars", exphbs.engine());
 app.set("view engine", "handlebars");
 app.set("views", "./views");
 
-// Static folder for public files
+// Set static resources folder
 app.use(express.static(path.join(__dirname, "public")));
 
 // Middleware for parsing requests
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
 
+
 // MongoDB connection
-const mongoURI = "mongodb://localhost:27017/EmployeeApp"
-mongoose.connect(mongoURI)
+const mongoURI = "mongodb://localhost:27017/Empl";
+mongoose.connect(mongoURI);
 const db = mongoose.connection;
-db.on("error", console.error.bind(console, "MongoDB connection error:"));
+
+db.on("error", console.error.bind(console, "MongoDB connection error"));
 db.once("open", () => {
-  console.log("Connected to MongoDB");
+    console.log("Connected to MongoDB Database");
 });
 
 // Mongoose Schema and Model
@@ -38,68 +41,102 @@ const employeeSchema = new mongoose.Schema({
   salary: Number,
 });
 
-const Employee = mongoose.model("Employee", employeeSchema);
+const Employee = mongoose.model("employee", employeeSchema, "employees");
 
 // Routes
 
-// Home route (view all employees)
+// Index route - Home Page
 app.get("/", async (req, res) => {
   try {
-    const employees = await Employee.find();
-    res.render("home", { employees });
+      const employees = await Employee.find();
+      res.render("home", {
+          employees,
+          title: "Employee List",
+      });
   } catch (err) {
-    res.status(500).send("Error fetching employees");
+      console.error(err);
+      res.status(500).send("Failed to fetch employees");
   }
 });
 
-// Add employee form
-app.get("/add", (req, res) => {
-  res.render("addEmployee");
-});
-
-// Add employee to DB
-app.post("/add", async (req, res) => {
+// GET - Employee List
+app.get("/employees", async (req, res) => {
   try {
-    const newEmployee = new Employee(req.body);
-    await newEmployee.save();
-    res.redirect("/");
+      const employees = await Employee.find();
+      res.render("home", { employees, title: "Employee List" });
   } catch (err) {
-    res.status(400).send("Error adding employee");
+      res.status(500).json({ error: "Failed to fetch employee data" });
   }
 });
 
-// Update employee form
-app.get("/update/:id", async (req, res) => {
+// Get route for a single employee
+app.get("/employees/:id", async (req, res) => {
   try {
-    const employee = await Employee.findById(req.params.id);
-    if (!employee) return res.status(404).send("Employee not found");
-    res.render("updateEmployee", { employee });
+      const employee = await Employee.findById(req.params.id);
+      if (!employee) {
+          return res.status(404).json({ error: "Employee not found" });
+      }
+      res.json(employee);
   } catch (err) {
-    res.status(500).send("Error fetching employee");
+      res.status(500).json({ error: "Failed to fetch employee" });
   }
 });
 
-// Update employee in DB
-app.post("/update/:id", async (req, res) => {
+
+app.post("/addEmployee", async (req, res) => {
   try {
-    await Employee.findByIdAndUpdate(req.params.id, req.body);
-    res.redirect("/");
+      const newEmployee = new Employee(req.body);
+      const savedEmployee = await newEmployee.save();
+      res.redirect("/employees");
   } catch (err) {
-    res.status(400).send("Error updating employee");
+      console.error(err);
+      res.status(400).send("Failed to create employee");
   }
 });
-
-// Delete employee
-app.post("/delete/:id", async (req, res) => {
+app.get("/updateEmployee/:id", async (req, res) => {
   try {
-    await Employee.findByIdAndDelete(req.params.id);
-    res.redirect("/");
+      const employee = await Employee.findById(req.params.id);
+      if (!employee) {
+          return res.status(404).send("Employee not found");
+      }
+      res.render("updateEmployee", { employee, title: "Update Employee" });
   } catch (err) {
-    res.status(500).send("Error deleting employee");
+      console.error(err);
+      res.status(500).send("Failed to fetch employee");
   }
 });
 
-// Start server
+app.put("/updateEmployee/:id", async (req, res) => {
+  try {
+      const updatedEmployee = await Employee.findByIdAndUpdate(req.params.id, req.body, { new: true });
+      if (!updatedEmployee) {
+          return res.status(404).json({ error: "Employee not found" });
+      }
+      res.redirect("/employees");
+  } catch (err) {
+      res.status(400).json({ error: "Failed to update the employee" });
+  }
+});
+
+
+app.delete("/deleteEmployee/:id", async (req, res) => {
+  try {
+      const deletedEmployee = await Employee.findByIdAndDelete(req.params.id);
+      if (!deletedEmployee) {
+          return res.status(404).json({ error: "Employee not found" });
+      }
+      res.redirect("/employees");
+  } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: "Failed to delete employee" });
+  }
+});
+
+app.get("/nodemon", (req, res) => {
+  res.sendStatus(500);
+});
+
+// Start the server
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`Server running on port ${PORT}`);
 });

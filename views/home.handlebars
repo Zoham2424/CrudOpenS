@@ -1,33 +1,36 @@
-<h1>Employee List</h1>
-<a href="/add">Add Employee</a>
+<h1>{{title}}</h1>
 <table>
-  <thead>
-    <tr>
-      <th>First Name</th>
-      <th>Last Name</th>
-      <th>Department</th>
-      <th>Start Date</th>
-      <th>Job Title</th>
-      <th>Salary</th>
-      <th>Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-    {{#each employees}}
-    <tr>
-      <td>{{this.firstName}}</td>
-      <td>{{this.lastName}}</td>
-      <td>{{this.department}}</td>
-      <td>{{this.startDate}}</td>
-      <td>{{this.jobTitle}}</td>
-      <td>{{this.salary}}</td>
-      <td>
-        <a href="/update/{{this._id}}">Update</a>
-        <form action="/delete/{{this._id}}" method="POST" style="display:inline;">
-          <button type="submit">Delete</button>
-        </form>
-      </td>
-    </tr>
-    {{/each}}
-  </tbody>
+    <thead>
+        <tr>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Department</th>
+            <th>Start Date</th>
+            <th>Job Title</th>
+            <th>Salary</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{#each employees}}
+        <tr>
+            <td>{{this.firstName}}</td>
+            <td>{{this.lastName}}</td>
+            <td>{{this.department}}</td>
+            <td>{{this.startDate}}</td>
+            <td>{{this.jobTitle}}</td>
+            <td>{{this.salary}}</td>
+            <td>
+                <a href="/updateEmployee/{{this._id}}">Update</a>
+                <form action="/deleteEmployee/{{this._id}}" method="POST" style="display:inline;">
+                    <button type="submit">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {{else}}
+        <tr>
+            <td colspan="7">No employees found.</td>
+        </tr>
+        {{/each}}
+    </tbody>
 </table>

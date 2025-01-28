@@ -1,22 +1,41 @@
 <h1>Add New Employee</h1>
 <form action="/add" method="POST">
-  <label for="firstName">First Name:</label>
-  <input type="text" id="firstName" name="firstName" required>
+  <div>
+    <label for="firstName">First Name:</label>
+    <input type="text" id="firstName" name="firstName" required>
+  </div>
 
-  <label for="lastName">Last Name:</label>
-  <input type="text" id="lastName" name="lastName" required>
+  <div>
+    <label for="lastName">Last Name:</label>
+    <input type="text" id="lastName" name="lastName" required>
+  </div>
 
-  <label for="department">Department:</label>
-  <input type="text" id="department" name="department" required>
+  <div>
+    <label for="department">Department:</label>
+    <select id="department" name="department" required>
+      <option value="HR">HR</option>
+      <option value="Engineering">Engineering</option>
+      <option value="Sales">Sales</option>
+    </select>
+  </div>
 
-  <label for="startDate">Start Date:</label>
-  <input type="date" id="startDate" name="startDate" required>
+  <div>
+    <label for="startDate">Start Date:</label>
+    <input type="date" id="startDate" name="startDate" required>
+  </div>
 
-  <label for="jobTitle">Job Title:</label>
-  <input type="text" id="jobTitle" name="jobTitle" required>
+  <div>
+    <label for="jobTitle">Job Title:</label>
+    <input type="text" id="jobTitle" name="jobTitle" required>
+  </div>
 
-  <label for="salary">Salary:</label>
-  <input type="number" id="salary" name="salary" required>
-  
-  <button type="submit">Add Employee</button>
+  <div>
+    <label for="salary">Salary:</label>
+    <input type="number" id="salary" name="salary" required>
+  </div>
+
+  <div>
+    <button type="submit" class="submit-btn">Add Employee</button>
+    <a href="/employees"><button type="button">Cancel</button></a>
+  </div>
 </form>

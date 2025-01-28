@@ -1,0 +1,28 @@
+<form action="/delete" method="POST">
+  <h1>title</h1>
+  <p>Are you sure you want to delete the employee?</p>
+  <table>
+    <tr>
+      <td>First Name:</td>
+      <td>{{employee.firstName}}</td>
+    </tr>
+    <tr>
+      <td>Last Name:</td>
+      <td>{{employee.lastName}}</td>
+    </tr>
+    <tr>
+      <td>Department:</td>
+      <td>{{employee.department}}</td>
+    </tr>
+    <tr>
+      <td>Start Date:</td>
+      <td>{{formatDate employee.startDate}}</td> <!-- Use helper for formatting -->
+    </tr>
+    <tr>
+      <td>Job Title:</td>
+      <td>{{employee.jobTitle}}</td>
+    </tr>
+  </table>
+  <button type="submit">Yes, Delete</button>
+  <a href="/employees"><button type="button">Cancel</button></a>
+</form>
