@@ -1,4 +1,6 @@
-<h1>{{title}}</h1>
+<h1>Employee list 
+  
+</h1>
 <table>
     <thead>
         <tr>
@@ -14,7 +16,7 @@
     <tbody>
         {{#each employees}}
         <tr>
-            <td>{{this.firstName}}</td>
+            <td>{{{this.firstName}}}</td>
             <td>{{this.lastName}}</td>
             <td>{{this.department}}</td>
             <td>{{this.startDate}}</td>
@@ -26,10 +28,6 @@
                     <button type="submit">Delete</button>
                 </form>
             </td>
-        </tr>
-        {{else}}
-        <tr>
-            <td colspan="7">No employees found.</td>
         </tr>
         {{/each}}
     </tbody>

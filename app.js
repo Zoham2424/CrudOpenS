@@ -1,9 +1,10 @@
+
 const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const exphbs = require("express-handlebars");
 const path = require("path");
-const methodOverride = require('method-override');
+
 
 const app = express();
 const PORT = 3000;
@@ -63,69 +64,83 @@ app.get("/", async (req, res) => {
 app.get("/employees", async (req, res) => {
   try {
       const employees = await Employee.find();
-      res.render("home", { employees, title: "Employee List" });
-  } catch (err) {
-      res.status(500).json({ error: "Failed to fetch employee data" });
-  }
-});
-
-// Get route for a single employee
-app.get("/employees/:id", async (req, res) => {
-  try {
-      const employee = await Employee.findById(req.params.id);
-      if (!employee) {
-          return res.status(404).json({ error: "Employee not found" });
-      }
-      res.json(employee);
-  } catch (err) {
-      res.status(500).json({ error: "Failed to fetch employee" });
-  }
-});
-
-
-app.post("/addEmployee", async (req, res) => {
-  try {
-      const newEmployee = new Employee(req.body);
-      const savedEmployee = await newEmployee.save();
-      res.redirect("/employees");
+      res.render("home", {
+          employees,
+          title: "Employee List",
+      });
   } catch (err) {
       console.error(err);
-      res.status(400).send("Failed to create employee");
+      res.status(500).send("Failed to fetch employees");
   }
 });
-app.get("/updateEmployee/:id", async (req, res) => {
+
+// GET - Show form to add a new employee
+app.get("/add", (req, res) => {
+  res.render("addEmployee", {
+      title: "Add Employee",
+      departments: ["HR", "Engineering", "Sales"], 
+  });
+});
+
+// POST - Create a new employee
+app.post("/add", async (req, res) => {
+    try {
+        const newEmployee = new Employee(req.body);
+        await newEmployee.save();
+        res.redirect("/employees");
+    } catch (err) {
+        console.error(err);
+        res.status(400).send("Failed to create employee");
+    }
+});
+
+// GET - Show form to update an employee
+app.get("/updateEmployees/:id", async (req, res) => {
   try {
       const employee = await Employee.findById(req.params.id);
       if (!employee) {
           return res.status(404).send("Employee not found");
       }
-      res.render("updateEmployee", { employee, title: "Update Employee" });
+      res.render("updateEmployees", {
+          employee,
+          title: "Update Employee",
+          departments: ["HR", "Engineering", "Sales"],
+      });
   } catch (err) {
       console.error(err);
       res.status(500).send("Failed to fetch employee");
   }
 });
 
-app.put("/updateEmployee/:id", async (req, res) => {
-  try {
-      const updatedEmployee = await Employee.findByIdAndUpdate(req.params.id, req.body, { new: true });
+// PUT - Update an employee
+app.put("/updateEmployees/:id", (req, res) => {
+  // Using a promise to update employee by ID
+  Employee.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+  })
+  .then((updatedEmployee) => {
       if (!updatedEmployee) {
           return res.status(404).json({ error: "Employee not found" });
       }
-      res.redirect("/employees");
-  } catch (err) {
+      res.json(updatedEmployee);
+  })
+  .catch((err) => {
       res.status(400).json({ error: "Failed to update the employee" });
-  }
+  });
 });
 
-
+// DELETE - Delete an employee
 app.delete("/deleteEmployee/:id", async (req, res) => {
   try {
+      // Find employee by ID to delete
       const deletedEmployee = await Employee.findByIdAndDelete(req.params.id);
+      
       if (!deletedEmployee) {
           return res.status(404).json({ error: "Employee not found" });
       }
-      res.redirect("/employees");
+
+      res.json({ message: "Employee deleted successfully" });
   } catch (err) {
       console.error(err);
       res.status(500).json({ error: "Failed to delete employee" });
