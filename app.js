@@ -7,15 +7,15 @@ const path = require("path");
 const app = express();
 const PORT = 3000;
 
-// Set Handlebars as our templating engine
+
 app.engine("handlebars", exphbs.engine());
 app.set("view engine", "handlebars");
 app.set("views", "./views");
 
-// Set our static resources folder
+
 app.use(express.static(path.join(__dirname, "public")));
 
-// Middleware for parsing form data
+
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -30,7 +30,7 @@ db.once("open", () => {
   console.log("Connected to MongoDB Database");
 });
 
-// Mongoose Schema and Model for Employee
+// Mongoose Schema and Model 
 const employeeSchema = new mongoose.Schema({
   firstName: String,
   lastName: String,
@@ -42,8 +42,7 @@ const employeeSchema = new mongoose.Schema({
 
 const Employee = mongoose.model("Employee", employeeSchema, "employees");
 
-// CRUD Routes
-
+// Routes
 app.get("/", async (req, res) => {
   try {
       const employees = await Employee.find();
@@ -126,6 +125,9 @@ app.post("/deleteEmployee/:id", async (req, res) => {
     res.status(500).send("Error deleting employee.");
   }
 });
+app.get("/nodemon",(req,res)=>{
+  res.sendStatus(500);
+})
 
 // Listen on PORT 3000
 app.listen(PORT, () => {

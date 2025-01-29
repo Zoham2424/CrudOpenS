@@ -1,7 +1,30 @@
 body {
-  color: black;
+  font-family: Arial, sans-serif;
+  margin: 20px;
 }
 
-table td, table th {
-  color: black;
+h1 {
+  color: #1c1a99;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #4a74a0;
 }
