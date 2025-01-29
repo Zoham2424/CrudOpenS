@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const exphbs = require("express-handlebars");
 const path = require("path");
-
+const { allowedNodeEnvironmentFlags } = require("process");
 
 const app = express();
 const PORT = 3000;
@@ -42,7 +42,7 @@ const employeeSchema = new mongoose.Schema({
   salary: Number,
 });
 
-const Employee = mongoose.model("employee", employeeSchema, "employees");
+const Employee = mongoose.model("Employee", employeeSchema, "employees");
 
 // Routes
 
@@ -64,60 +64,47 @@ app.get("/", async (req, res) => {
 app.get("/employees", async (req, res) => {
   try {
       const employees = await Employee.find();
-      res.render("home", {
-          employees,
-          title: "Employee List",
-      });
+      res.json(employees);
   } catch (err) {
       console.error(err);
       res.status(500).send("Failed to fetch employees");
   }
 });
 
-// GET - Show form to add a new employee
-app.get("/add", (req, res) => {
-  res.render("addEmployee", {
-      title: "Add Employee",
-      departments: ["HR", "Engineering", "Sales"], 
-  });
-});
 
-// POST - Create a new employee
-app.post("/add", async (req, res) => {
-    try {
-        const newEmployee = new Employee(req.body);
-        await newEmployee.save();
-        res.redirect("/employees");
-    } catch (err) {
-        console.error(err);
-        res.status(400).send("Failed to create employee");
-    }
-});
-
-// GET - Show form to update an employee
-app.get("/updateEmployees/:id", async (req, res) => {
-  try {
+app.get("/employees/:id", async (req,res)=>{
+  try{
       const employee = await Employee.findById(req.params.id);
-      if (!employee) {
-          return res.status(404).send("Employee not found");
+      if(!employee){
+          return res.status(404).json({error:"Game not found"});
       }
-      res.render("updateEmployees", {
-          employee,
-          title: "Update Employee",
-          departments: ["HR", "Engineering", "Sales"],
-      });
-  } catch (err) {
-      console.error(err);
-      res.status(500).send("Failed to fetch employee");
+      res.json(employee);
+
+  }catch(err){
+      res.status(500).json({error:"Failed to fetch game"});
   }
 });
 
-// PUT - Update an employee
-app.put("/updateEmployees/:id", (req, res) => {
-  // Using a promise to update employee by ID
+// GET - Show form to add a new employee
+app.get("/addEmployee", (req, res) => {
+  res.render("addEmployee", { title: "Add New Employee" });
+});
+
+app.post("/addEmployee", async (req, res) => {
+  try {
+      const newEmployee = new Employee(req.body);
+      await newEmployee.save();
+      res.redirect("/"); 
+  } catch (err) {
+      console.error("Error saving employee:", err);
+      res.status(400).send("Failed to add employee");
+  }
+});
+
+app.put("/updateEmployee/:id", (req, res) => {
   Employee.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
+      new: true, 
+      runValidators: true, 
   })
   .then((updatedEmployee) => {
       if (!updatedEmployee) {
@@ -126,25 +113,38 @@ app.put("/updateEmployees/:id", (req, res) => {
       res.json(updatedEmployee);
   })
   .catch((err) => {
+      console.error("Error updating employee:", err);
       res.status(400).json({ error: "Failed to update the employee" });
   });
 });
 
-// DELETE - Delete an employee
-app.delete("/deleteEmployee/:id", async (req, res) => {
+app.delete("/deleteEmployee", async (req, res) => {
   try {
-      // Find employee by ID to delete
-      const deletedEmployee = await Employee.findByIdAndDelete(req.params.id);
-      
+      const { firstName, lastName } = req.query;
+
+      if (!firstName || !lastName) {
+          return res.status(400).json({ error: "Missing employee firstName or lastName" });
+      }
+
+      console.log(`Deleting employee: ${firstName} ${lastName}`);
+      const deletedEmployee = await Employee.findOneAndDelete({ firstName, lastName });
+
       if (!deletedEmployee) {
           return res.status(404).json({ error: "Employee not found" });
       }
 
-      res.json({ message: "Employee deleted successfully" });
+      res.json({ message: "Employee deleted successfully", deletedEmployee });
   } catch (err) {
-      console.error(err);
+      console.error("Error deleting employee:", err);
       res.status(500).json({ error: "Failed to delete employee" });
   }
+});
+
+app.get("/hbsindex", (req, res) => {
+  res.render("home", {
+      title: "Welcome to the Handlebars Site",
+      message: "This is our page using the template engine",
+  });
 });
 
 app.get("/nodemon", (req, res) => {
