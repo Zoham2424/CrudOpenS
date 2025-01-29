@@ -101,16 +101,16 @@ app.post("/addEmployee", async (req, res) => {
   }
 });
 
-app.put("/updateEmployee/:id", (req, res) => {
+app.put("/updateEmployees/:id", (req, res) => {
   Employee.findByIdAndUpdate(req.params.id, req.body, {
       new: true, 
       runValidators: true, 
   })
-  .then((updatedEmployee) => {
-      if (!updatedEmployee) {
+  .then((updatedEmployees) => {
+      if (!updatedEmployees) {
           return res.status(404).json({ error: "Employee not found" });
       }
-      res.json(updatedEmployee);
+      res.json(updatedEmployees);
   })
   .catch((err) => {
       console.error("Error updating employee:", err);
@@ -118,27 +118,21 @@ app.put("/updateEmployee/:id", (req, res) => {
   });
 });
 
-app.delete("/deleteEmployee", async (req, res) => {
-  try {
-      const { firstName, lastName } = req.query;
+app.delete("/deleteEmployee/employeename", async (req,res)=>{
+  try{
+      const employeename = req.query;
+      const employee = await Employee.find(employeename);
 
-      if (!firstName || !lastName) {
-          return res.status(400).json({ error: "Missing employee firstName or lastName" });
+      if(employee.length === 0){
+          return res.status(404).json({ error: "Failed to find the game" });
       }
-
-      console.log(`Deleting employee: ${firstName} ${lastName}`);
-      const deletedEmployee = await Employee.findOneAndDelete({ firstName, lastName });
-
-      if (!deletedEmployee) {
-          return res.status(404).json({ error: "Employee not found" });
-      }
-
-      res.json({ message: "Employee deleted successfully", deletedEmployee });
-  } catch (err) {
-      console.error("Error deleting employee:", err);
-      res.status(500).json({ error: "Failed to delete employee" });
+      const deletedEmployee = await Employee.findOneAndDelete(employeename);
+      res.json({message:"Game deleted successfully"})
+  }catch(err){
+      console.error(err);
+      res.status(404).json({ error: "Game not found"});
   }
-});
+})
 
 app.get("/hbsindex", (req, res) => {
   res.render("home", {

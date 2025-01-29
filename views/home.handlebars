@@ -16,18 +16,18 @@
     <tbody>
         {{#each employees}}
         <tr>
-            <td>{{{this.firstName}}}</td>
-            <td>{{this.lastName}}</td>
-            <td>{{this.department}}</td>
-            <td>{{this.startDate}}</td>
-            <td>{{this.jobTitle}}</td>
-            <td>{{this.salary}}</td>
-            <td>
-                <a href="/updateEmployee/{{this._id}}">Update</a>
-                <form action="/deleteEmployee/{{this._id}}" method="POST" style="display:inline;">
+            <th>{{employees.firstName}}</th>
+            <th>{{employees.lastName}}</th>
+            <th>{{employees.department}}</th>
+            <th>{{employees.startDate}}</th>
+            <th>{{employees.jobTitle}}</th>
+            <th>{{employees.salary}}</th>
+            <th>
+                <a href="/updateEmployee/{{employees._id}}">Update</a>
+                <form action="/deleteEmployee/{{employees._id}}" method="POST" style="display:inline;">
                     <button type="submit">Delete</button>
                 </form>
-            </td>
+            </th>
         </tr>
         {{/each}}
     </tbody>
