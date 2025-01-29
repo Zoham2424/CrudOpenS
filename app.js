@@ -1,10 +1,8 @@
-
 const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const exphbs = require("express-handlebars");
 const path = require("path");
-const { allowedNodeEnvironmentFlags } = require("process");
 
 const app = express();
 const PORT = 3000;
@@ -14,29 +12,29 @@ app.engine("handlebars", exphbs.engine());
 app.set("view engine", "handlebars");
 app.set("views", "./views");
 
-// Set static resources folder
+// Set our static resources folder
 app.use(express.static(path.join(__dirname, "public")));
 
-// Middleware for parsing requests
+// Middleware for parsing form data
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
 
-
-// MongoDB connection
+// MongoDB Database connection
 const mongoURI = "mongodb://localhost:27017/Empl";
 mongoose.connect(mongoURI);
 const db = mongoose.connection;
 
-db.on("error", console.error.bind(console, "MongoDB connection error"));
+
+db.on("error", console.error.bind(console, "MongoDB Connection error"));
 db.once("open", () => {
-    console.log("Connected to MongoDB Database");
+  console.log("Connected to MongoDB Database");
 });
 
-// Mongoose Schema and Model
+// Mongoose Schema and Model for Employee
 const employeeSchema = new mongoose.Schema({
   firstName: String,
   lastName: String,
-  department: String,
+  department: { type: String, enum: ["HR", "Development", "Marketing"] },
   startDate: Date,
   jobTitle: String,
   salary: Number,
@@ -44,9 +42,8 @@ const employeeSchema = new mongoose.Schema({
 
 const Employee = mongoose.model("Employee", employeeSchema, "employees");
 
-// Routes
+// CRUD Routes
 
-// Index route - Home Page
 app.get("/", async (req, res) => {
   try {
       const employees = await Employee.find();
@@ -59,93 +56,78 @@ app.get("/", async (req, res) => {
       res.status(500).send("Failed to fetch employees");
   }
 });
-
-// GET - Employee List
+// Get all employees
 app.get("/employees", async (req, res) => {
   try {
-      const employees = await Employee.find();
-      res.json(employees);
+    const employees = await Employee.find();
+    console.log(employees);
+    res.render("home", { employees });
   } catch (err) {
-      console.error(err);
-      res.status(500).send("Failed to fetch employees");
+    res.status(500).send("Error fetching employees.");
   }
 });
 
-
-app.get("/employees/:id", async (req,res)=>{
-  try{
-      const employee = await Employee.findById(req.params.id);
-      if(!employee){
-          return res.status(404).json({error:"Game not found"});
-      }
-      res.json(employee);
-
-  }catch(err){
-      res.status(500).json({error:"Failed to fetch game"});
+// Get single employee
+app.get("/employee/:id", async (req, res) => {
+  try {
+    const employee = await Employee.findById(req.params.id);
+    if (!employee) {
+      return res.status(404).send("Employee not found.");
+    }
+    res.render("updateEmployee", { employee });
+  } catch (err) {
+    res.status(500).send("Error fetching employee.");
   }
 });
 
-// GET - Show form to add a new employee
+// Add new employee
 app.get("/addEmployee", (req, res) => {
-  res.render("addEmployee", { title: "Add New Employee" });
+  res.render("addEmployee");
 });
 
 app.post("/addEmployee", async (req, res) => {
   try {
-      const newEmployee = new Employee(req.body);
-      await newEmployee.save();
-      res.redirect("/"); 
+    const { firstName, lastName, department, startDate, jobTitle, salary } = req.body;
+    const newEmployee = new Employee({ firstName, lastName, department, startDate, jobTitle, salary });
+    await newEmployee.save();
+    res.redirect("/employees");
   } catch (err) {
-      console.error("Error saving employee:", err);
-      res.status(400).send("Failed to add employee");
+    res.status(500).send("Error adding employee.");
   }
 });
 
-app.put("/updateEmployees/:id", (req, res) => {
-  Employee.findByIdAndUpdate(req.params.id, req.body, {
-      new: true, 
-      runValidators: true, 
-  })
-  .then((updatedEmployees) => {
-      if (!updatedEmployees) {
-          return res.status(404).json({ error: "Employee not found" });
-      }
-      res.json(updatedEmployees);
-  })
-  .catch((err) => {
-      console.error("Error updating employee:", err);
-      res.status(400).json({ error: "Failed to update the employee" });
-  });
-});
-
-app.delete("/deleteEmployee/employeename", async (req,res)=>{
-  try{
-      const employeename = req.query;
-      const employee = await Employee.find(employeename);
-
-      if(employee.length === 0){
-          return res.status(404).json({ error: "Failed to find the game" });
-      }
-      const deletedEmployee = await Employee.findOneAndDelete(employeename);
-      res.json({message:"Game deleted successfully"})
-  }catch(err){
-      console.error(err);
-      res.status(404).json({ error: "Game not found"});
+// Update employee
+app.post("/updateEmployee/:id", async (req, res) => {
+  try {
+    const { firstName, lastName, department, startDate, jobTitle, salary } = req.body;
+    const updatedEmployee = await Employee.findByIdAndUpdate(
+      req.params.id,
+      { firstName, lastName, department, startDate, jobTitle, salary },
+      { new: true, runValidators: true }
+    );
+    if (!updatedEmployee) {
+      return res.status(404).send("Employee not found.");
+    }
+    res.redirect("/employees");
+  } catch (err) {
+    res.status(500).send("Error updating employee.");
   }
-})
-
-app.get("/hbsindex", (req, res) => {
-  res.render("home", {
-      title: "Welcome to the Handlebars Site",
-      message: "This is our page using the template engine",
-  });
 });
 
-app.get("/nodemon", (req, res) => {
-  res.sendStatus(500);
+// Delete employee
+app.post("/deleteEmployee/:id", async (req, res) => {
+  try {
+    const deletedEmployee = await Employee.findByIdAndDelete(req.params.id);
+    if (!deletedEmployee) {
+      return res.status(404).send("Employee not found.");
+    }
+    res.redirect("/employees");
+  } catch (err) {
+    res.status(500).send("Error deleting employee.");
+  }
 });
 
-// Start the server
+// Listen on PORT 3000
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });

@@ -1,35 +1,7 @@
 body {
-  font-family: Arial, sans-serif;
-  background-color: #09796c; 
-  padding: 0;
-}
-  header {
-    margin-bottom: 20px;
-    border-bottom: 2px solid #70205f;
-    padding-bottom: 10px;
-  }
-  nav {
-    background-color: #f4f4f4;
-    padding: 10px;
-    border-radius: 5px;
-  }
-
-  form {
-    background-color: #580909; 
-    color: white; 
-    padding: 20px;
-    border-radius: 10px;
-
-    max-width: 500px;
-    margin: 2rem auto;
-}
-th, td {
-  padding: 12px;
-  text-align: left;
-  border-bottom: 1px solid #721515;
+  color: black;
 }
 
-th {
-  background-color: #4b3947;
-  color: rgb(158, 161, 161);
-} 
+table td, table th {
+  color: black;
+}
