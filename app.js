@@ -1,23 +1,60 @@
+require("dotenv").config();
 const express = require("express");
+const session = require("express-session");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const exphbs = require("express-handlebars");
 const path = require("path");
+const passport = require("passport");
+const flash = require("connect-flash");
+const { allowedNodeEnvironmentFlags } = require("process");
+const Employee = require("./models/Employee");
 
 const app = express();
 const PORT = 3000;
 
+//Passport Configuration
+require("./config/passport")(passport);
 
+//Set Handlebars as our templating engine
 app.engine("handlebars", exphbs.engine());
 app.set("view engine", "handlebars");
 app.set("views", "./views");
 
+//Sets our static resources folder
+app.use(express.static(path.join(__dirname,"public")));
 
-app.use(express.static(path.join(__dirname, "public")));
-
-
+//Middleware body-parser parses jsons requests
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
+
+//Setup Express-Session Middleware
+app.use(session({
+    secret:"secret",
+    resave:false,
+    saveUninitialized:true
+}))
+
+//Setup Passport Middleware
+app.use(passport.initialize());
+app.use(passport.session());
+
+//Setup Flash messaging
+app.use(flash());
+
+//Global Variables for Flash Messages
+app.use((req, res, next)=>{
+    res.locals.success_msg = req.flash("success_msg");
+    res.locals.error_msg = req.flash("error_msg");
+    res.locals.error = req.flash("error");
+    res.locals.user = req.user || null;
+    next();
+});
+
+//Required Route Router Example
+app.use("/", require("./routes/auth").router);
+app.use("/", require("./routes/crud"));
+
 
 // MongoDB Database connection
 const mongoURI = "mongodb://localhost:27017/Empl";
@@ -86,8 +123,7 @@ app.get("/addEmployee", (req, res) => {
 
 app.post("/addEmployee", async (req, res) => {
   try {
-    const { firstName, lastName, department, startDate, jobTitle, salary } = req.body;
-    const newEmployee = new Employee({ firstName, lastName, department, startDate, jobTitle, salary });
+    const newEmployee = new Employee(req.body);
     await newEmployee.save();
     res.redirect("/employees");
   } catch (err) {
@@ -124,6 +160,7 @@ app.post("/deleteEmployee/:id", async (req, res) => {
   } catch (err) {
     res.status(500).send("Error deleting employee.");
   }
+
 });
 app.get("/nodemon",(req,res)=>{
   res.sendStatus(500);
