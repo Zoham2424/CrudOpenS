@@ -67,17 +67,6 @@ db.once("open", () => {
   console.log("Connected to MongoDB Database");
 });
 
-// Mongoose Schema and Model 
-const employeeSchema = new mongoose.Schema({
-  firstName: String,
-  lastName: String,
-  department: { type: String, enum: ["HR", "Development", "Marketing"] },
-  startDate: Date,
-  jobTitle: String,
-  salary: Number,
-});
-
-const Employee = mongoose.model("Employee", employeeSchema, "employees");
 
 // Routes
 app.get("/", async (req, res) => {
