@@ -106,6 +106,9 @@ app.get("/login", (req, res) => {
   res.render("login");
 });
 
+app.get("/",(req, res)=>{
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
 // Handle user login
 app.post("/login", passport.authenticate("local", {
   successRedirect: "/dashboard",
