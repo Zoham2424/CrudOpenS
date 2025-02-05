@@ -3,7 +3,6 @@ const router = express.Router();
 const Employee = require("../models/Employee");
 const {isAuthenticated} = require("./auth"); //Import our Authentcation routes
 
-//CRUD router examples Connection to databas route examples below
 
 //get route to get data from database
 router.get("/employee", async (req,res)=>{
