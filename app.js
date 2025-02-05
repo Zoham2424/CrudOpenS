@@ -13,22 +13,22 @@ const { allowedNodeEnvironmentFlags } = require("process");
 const app = express();
 const PORT = 3000;
 
-// Passport Configuration
+
 require("./config/passport")(passport);
 
-// Set Handlebars as our templating engine
+
 app.engine("handlebars", exphbs.engine());
 app.set("view engine", "handlebars");
 app.set("views", "./views");
 
-// Set static resources folder
+
 app.use(express.static(path.join(__dirname, "public")));
 
-// Middleware body-parser parses JSON requests
+
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Setup Express-Session Middleware
+
 app.use(
   session({
     secret: "secret",
@@ -37,14 +37,14 @@ app.use(
   })
 );
 
-// Setup Passport Middleware
+
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Setup Flash messaging
+
 app.use(flash());
 
-// Global variables for Flash Messages
+
 app.use((req, res, next) => {
   res.locals.success_msg = req.flash("success_msg");
   res.locals.error_msg = req.flash("error_msg");
@@ -64,8 +64,7 @@ db.once("open", () => {
   console.log("Connected to MongoDB Database");
 });
 
-// Routes
-// Home page
+
 app.get("/", async (req, res) => {
   try {
     const employees = await Employee.find();
@@ -76,12 +75,12 @@ app.get("/", async (req, res) => {
   }
 });
 
-// Registration page (example)
+
 app.get("/register", (req, res) => {
   res.render("register");
 });
 
-// Handle user registration
+
 app.post("/register", async (req, res) => {
   const { username, email, password, confirmPassword } = req.body;
   if (password !== confirmPassword) {
@@ -101,7 +100,7 @@ app.post("/register", async (req, res) => {
   }
 });
 
-// Login page (example)
+
 app.get("/login", (req, res) => {
   res.render("login");
 });
@@ -109,7 +108,8 @@ app.get("/login", (req, res) => {
 app.get("/",(req, res)=>{
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
-// Handle user login
+
+
 app.post("/login", passport.authenticate("local", {
   successRedirect: "/dashboard",
   failureRedirect: "/login",
