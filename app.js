@@ -54,7 +54,7 @@ app.use((req, res, next) => {
 });
 
 // MongoDB Database connection
-const mongoURI = "mongodb://localhost:27017/Emp"; 
+const mongoURI = process.env.MONGO_URI; //
 mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true });
 const db = mongoose.connection;
 
