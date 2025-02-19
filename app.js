@@ -55,7 +55,7 @@ app.use((req, res, next) => {
 
 // MongoDB Database connection
 const mongoURI = process.env.MONGO_URI; //
-mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect(mongoURI);
 const db = mongoose.connection;
 
 // Check for connection
