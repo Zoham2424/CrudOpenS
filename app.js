@@ -58,7 +58,7 @@ app.use("/", require("./routes/crud"));
 
 //MongoDB Database connection
 // const mongoURI = "mongodb://localhost:27017/gamelibrary"
-const mongoURI = process.env.MONGO_URI; //||  "mongodb://localhost:27017/gamelibrary"
+const mongoURI = process.env.MONGO_URI.replace("${MONGO_PASSWORD}", process.env.MONGO_PASSWORD); //||  "mongodb://localhost:27017/gamelibrary"
 mongoose.connect(mongoURI);
 const db = mongoose.connection;
 //check for connection
