@@ -9,6 +9,5 @@ const employeeSchema = new mongoose.Schema({
     salary: Number
 });
 
-const Employee = mongoose.model("Employee", employeeSchema, "employees");
+module.exports = mongoose.model("Employee", employeeSchema, "employees");
 
-module.exports = Employee;
