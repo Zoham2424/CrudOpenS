@@ -8,6 +8,7 @@ const path = require("path");
 const passport = require("passport");
 const flash = require("connect-flash");
 const { allowedNodeEnvironmentFlags } = require("process");
+const Employee = require("./models/Employee");
 
 
 const app = express();
