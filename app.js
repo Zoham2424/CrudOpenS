@@ -8,58 +8,72 @@ const path = require("path");
 const passport = require("passport");
 const flash = require("connect-flash");
 const { allowedNodeEnvironmentFlags } = require("process");
-const Employee = require("./models/Employee");
+const Game = require("./models/Employee");
 
 
 const app = express();
-const PORT = process.env.Port || 3000;
+const PORT =  process.env.PORT || 3000;
 
-
+//Passport Configuration
 require("./config/passport")(passport);
 
-
+//Set Handlebars as our templating engine
 app.engine("handlebars", exphbs.engine());
 app.set("view engine", "handlebars");
 app.set("views", path.join(__dirname, "views"));
 
+//Sets our static resources folder
+app.use(express.static(path.join(__dirname,"public")));
 
-app.use(express.static(path.join(__dirname, "public")));
-
-
+//Middleware body-parser parses jsons requests
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
 
-
+//Setup Express-Session Middleware
 app.use(session({
-  secret:process.env.SESSION_SECRET,
-  resave:false,
-  saveUninitialized:true
+    secret:process.env.SESSION_SECRET,
+    resave:false,
+    saveUninitialized:true
 }))
 
-
+//Setup Passport Middleware
 app.use(passport.initialize());
 app.use(passport.session());
 
-
+//Setup Flash messaging
 app.use(flash());
 
-
-app.use((req, res, next) => {
-  res.locals.success_msg = req.flash("success_msg");
-  res.locals.error_msg = req.flash("error_msg");
-  res.locals.error = req.flash("error");
-  res.locals.user = req.user || null;
-  next();
+//Global Variables for Flash Messages
+app.use((req, res, next)=>{
+    res.locals.success_msg = req.flash("success_msg");
+    res.locals.error_msg = req.flash("error_msg");
+    res.locals.error = req.flash("error");
+    res.locals.user = req.user || null;
+    next();
 });
 
+//Required Route Router Example
 app.use("/", require("./routes/auth").router);
 app.use("/", require("./routes/crud"));
 
-
-// MongoDB Database connection
-const mongoURI = process.env.MONGO_URI; //
+//MongoDB Database connection
+// const mongoURI = "mongodb://localhost:27017/gamelibrary"
+const mongoURI = process.env.MONGO_URI; //||  "mongodb://localhost:27017/gamelibrary"
 mongoose.connect(mongoURI);
 const db = mongoose.connection;
+//check for connection
+db.on("error", console.error.bind(console, "MonoDB Connection error"));
+db.once("open", ()=>{
+    console.log("Connected to MongoDB Database");
+});
+
+
+app.use((req, res, next) => {
+    console.log(`Incoming request: ${req.method} ${req.url}`);
+    next();
+});
+
+
 
 // Check for connection
 db.on("error", console.error.bind(console, "MongoDB Connection error"));
