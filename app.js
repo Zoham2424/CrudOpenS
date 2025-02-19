@@ -11,7 +11,7 @@ const { allowedNodeEnvironmentFlags } = require("process");
 
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.Port || 3000;
 
 
 require("./config/passport")(passport);
@@ -19,7 +19,7 @@ require("./config/passport")(passport);
 
 app.engine("handlebars", exphbs.engine());
 app.set("view engine", "handlebars");
-app.set("views", "./views");
+app.set("views", path.join(__dirname, "views"));
 
 
 app.use(express.static(path.join(__dirname, "public")));
@@ -157,3 +157,5 @@ app.get("/nodemon", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+module.exports = app;
