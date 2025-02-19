@@ -82,15 +82,6 @@ db.once("open", () => {
 });
 
 
-app.get("/", async (req, res) => {
-  try {
-    const employees = await Employee.find();
-    res.render("home", { employees, title: "Employee List" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Failed to fetch employees");
-  }
-});
 
 
 app.get("/register", (req, res) => {
