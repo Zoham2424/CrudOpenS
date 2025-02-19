@@ -20,7 +20,7 @@ require("./config/passport")(passport);
 //Set Handlebars as our templating engine
 app.engine("handlebars", exphbs.engine());
 app.set("view engine", "handlebars");
-app.set("views", path.join(__dirname, "views"));
+app.set("views", path.join(__dirname, "./views"));
 
 //Sets our static resources folder
 app.use(express.static(path.join(__dirname,"public")));
@@ -59,12 +59,7 @@ app.use("/", require("./routes/crud"));
 //MongoDB Database connection
 // const mongoURI = "mongodb://localhost:27017/gamelibrary"
 const mongoURI = process.env.MONGO_URI; //||  "mongodb://localhost:27017/gamelibrary"
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-.then(() => console.log("Connected to MongoDB"))
-.catch(err => console.error("MongoDB Connection Failed:", err));
+mongoose.connect(mongoURI);
 const db = mongoose.connection;
 //check for connection
 db.on("error", console.error.bind(console, "MonoDB Connection error"));
