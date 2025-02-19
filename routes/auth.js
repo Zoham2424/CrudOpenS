@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
+const AppUsers = require("../models/User");
 
 //login page route
 router.get("/login", (req,res)=>{
