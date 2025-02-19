@@ -51,6 +51,10 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use("/", require("./routes/auth").router);
+app.use("/", require("./routes/crud"));
+
+
 // MongoDB Database connection
 const mongoURI = process.env.MONGO_URI; //
 mongoose.connect(mongoURI);
